@@ -50,4 +50,72 @@ interface ICryptoDevsNFT {
     function ownerOf(uint256 tokenId) external view returns (address owner);
 }
 
-contract CryptoDevsDAO {}
+contract CryptoDevsDAO {
+   
+    IFakeNFTMarketplace nftMarketplace;
+    ICryptoDevsNFT CryptoDevsNft;
+
+    constructor(address nftContract, address marketplaceContract) payable (
+        CryptoDevsNft = ICryptoDevsNFT(nftContract);
+        nftMarketplace = IFakeNFTMarketplace(marketplaceContract);
+    )
+
+    enum ProposalType {
+        BUY, 
+        SELL
+    }
+
+    enum VoteType {
+        YAY, 
+        NAY
+    }
+
+    struct Proposal {
+        uint256 nftTokenId;
+        uint256 deadline;
+        uint256 yayVotes;
+        uint256 nayVotes;
+        bool executed;
+        ProposalType proposalType;
+        mapping(address => bool) voters;
+    }
+
+    struct Member {
+        uint256 joinedAt;
+        uint256[] lockedUpNFTs;
+    }
+
+    mapping(uint256 => Proposal) public proposals;
+    mapping(address => Member) public members;
+
+    uint256 public numProposals;
+    uint256 public totalVotingPower;
+
+    modifier memberOnly() {
+        require(members[msg.sender].lockedUpNFTs.length > 0, "NOT_A_MEMBER");
+        _;
+    }
+
+    //Create proposal in the DAO
+    function createProposal(uint256 _forTokenId, ProposalType _proposalType)
+    external
+    memberOnly
+    return(uint256)
+    {
+        if (_proposalType == ProposalType.BUY) {
+            require(nftMarketplace.available(_forTokenId), "NFT_NOT_FOR_SALE");
+        } else {
+            nftMarketplace.ownerOf(_forTokenId) == address(this), "NOT_OWNED"
+        };
+    }
+
+    Proposal storage proposal = proposals[numProposals];
+    proposal.nftTokenId = _forTokenId;
+    proposal.deadline = block.timestamp + 2 minutes;
+    proposal.proposalType = _proposalType;
+
+    numProposals++;
+
+    return numProposals - 1;
+    // way for people to become member of the DAO
+}
