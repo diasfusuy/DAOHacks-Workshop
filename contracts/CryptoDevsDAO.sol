@@ -117,5 +117,26 @@ contract CryptoDevsDAO {
     numProposals++;
 
     return numProposals - 1;
+
+    // Vote yes/no on a given proposal
+    function voteOnProposal(uint256 _proposalId, VoteType _vote)
+    external
+    memberOnly
+    {
+        Proposal storage proposal = proposals[_proposalId];
+        require(proposal.deadline > block.timestamp, "INACTIVE_PROPOSAL");
+        require(proposal.voters[msg.sender] == false, "ALREADY_VOTED");
+
+        proposal.voters[msg.sender] = true;
+        uint256 totalVotingPower = members[msg.sender].lockedUpNFTs.length;
+
+        if(_vote == VoteType.YAY) {
+            proposal.yayVotes += votingPower;
+        } else {
+            proposal.nayVotes += votingPower;
+        }  
+    }
+
+
     // way for people to become member of the DAO
 }
